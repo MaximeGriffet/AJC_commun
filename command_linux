@@ -15,3 +15,6 @@ ip -6 neigh
 
 ping 8.8.8.8
 > vérifier une connectivité de bout en bout
+
+ip route
+> à executer sur une passerelle pour connaître les réseaux connectés
