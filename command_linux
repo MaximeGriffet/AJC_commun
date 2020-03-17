@@ -18,3 +18,9 @@ ping 8.8.8.8
 
 ip route
 > à executer sur une passerelle pour connaître les réseaux connectés
+
+show ipv6 route
+> 
+
+nc -l -p 4444
+> via netcat : l'ordinateur va ecouter sur le port 4444 
