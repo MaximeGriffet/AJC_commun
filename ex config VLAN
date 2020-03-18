@@ -1,0 +1,48 @@
+- créer template cisco iOSvL2
+> logiciel v15.2
+
+- connecter le switch aux PC
+> «  enable » (switch# indique que nous avons des droits priviligiés)
+> «  show ip int brie » 
+> on observe que les statuts sont d’emblées en up contrairement au routeur cisco qui est de base en shutdown
+- « show mac address-table » 
+> table des mac address du switch
+- enable secret testtest
+> met un mdr pour la session privilégiée
+- username root secret testtest
+> créer une session root dont le mdr est testtest
+- SW0(config)#ip domain-name ajc.fr
+> permet de nommer un domaine au switch. Permet de générer les clés SSH ensuite. Autrement, le SSH lira une erreur car le nom de domaine est inexistant
+- définir une taille de 2048 pour ne pas passer en SSH 1.5 qui n’est pas assez sécurisé
+> le ssh sera en 1.99
+- SW0(config)#ip ssh version 2
+> ssh est en version 2 ici
+- SW0#sh int status
+- SW0#sh vlan brie 
+> on observe ici les VLAN. Tou les ports du switch sont sur le VLAN1, il faut configurer le VLAN10
+- SW0(config)#vlan 10
+- SW0#sh vlan brie 
+> on observe le plan 10 qui est créé mais il faut maintenant le configurer
+- SW0(config)#interface vlan 10
+> on passe en « SW0(config-if)# » 
+> on va lui attribuer une ip a cette  interface
+- SW0(config-if)# ip add 192.168.1.200 255.255.255.0
+- SW0(config-if)#ipv6 add autoconfig
+- do sh ip int brie
+> l’interface vlan 10 va être configurée mais elle sera en shutdown
+> on va mon paramètre la passerelle car pour ne pas qu’il soit shutdwon il faut des interfaces connectées
+- SW0(config-if)#ip default-gateway 192.168.1.254
+> création passerelle ok
+> on va configurer les 8 premières interfaces 
+- interface range G0/0-3,G1/0-3
+- switchport mode access
+- switchport access vlan 10
+- spanning-tree portfast
+> ensuite on configure les 8 dernières :
+- SW0(config)#int range g2/0-3,g3/0-3
+- SW0(config-if-range)#shutdown
+- SW0(config-if-range)#exit
+> ces 3 commandes désactivent les 8 dernières interfaces car nous n’allons utiliser que les 8 premières
+
+-> SW0#wr
+> pour enregistrer la configuration du switch
