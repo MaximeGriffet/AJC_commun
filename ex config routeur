@@ -1,0 +1,85 @@
+Configurer fondamentalement un routeur. Le routage Ipv4 est activé par défaut sur un routeur cisco.
+
+- instancier un routeur en cliquant sur « new template en dessous de la fenêtre des paterns des media : choisir «  cisco iOS  »
+> l’installer sur le serveur principal
+> qemu system x86/64
+> IOSv version 15.6(2)T
+> install ok
+
+- placer le routeur en glissant-reposant la nouvelle icône du routeur
+- placer deux commutateurs ethernet
+- connecter les deux switch (commutateurs) au routeur en cliquant sur l’icône en forme de câble RJ45 puis en cliquant sur chacun des appareils. Il faut connecter les interfaces GI0/0 et GI0/1 pour chaque commutateurs respectifs
+> view, show/hide interface label pour afficher les détails des interfaces
+
+- lancer les machines émulées
+> démarrer la console du routeur pour booter l’OS
+- « show ip interface brief »
+> en cisco OS : ip signifie ipv4
+> toutes les interfaces sont désactivées par défaut sur le routeur nat, on les activent que par nécessité 
+
+- «  show running-config »
+> barre espace pour naviguer 
+
+- pour passer en mode configuration : conf t
+- «  hostname R1 » 
+> permet de renommer mon router 
+- en mode privilège :
+> do sh ip int brie
+> do sh run
+
+- les adresses ip privées sont des adresses qui ne connaissent pas de routes vers le réseau public
+> une adresse en ipv6 en fe80 est privée
+
+- lorsque j’active une interface en ipv6, une adresse est automatiquement liée sur l’interface, la partie dynamque  étant configuré via l’adresse mac, d’où le ff:
+> nous pouvons la configurer manuellement grâce à « ipv6 add fe80::1 link-local » 
+- pour configurer en mode conf t :
+R1(config)#interface GigabitEthernet0/0 
+R1(config-if)#ip address 192.168.1.254 255.255.255.0
+R1(config-if)#ipv6 address fe80::1 link-local
+R1(config-if)#ipv6 address fd00:192:168:1::254/64 
+R1(config-if)#exit
+
+
+ensuite il faut enregistrer notre configuration pour qu’elle soit démarrer dès le prochain démarrage de notre router.
+- « copy running-config startup-config » 
+- « wr »
+
+- création d’une machine quenu 
+> new template
+> add manually a template
+> QEMU vts 
+> new , name : ubuntu
+> ram : 512 MB
+> console : telnet
+> image disk : ubuntu 1804.qcow2
+
+Une fois les deux machines ubuntu créées et reliées à leurs switch respectifs, il faut vérifier les interfaces (show dev eth0). On remarque qu’il n’y a que des adresse ipv65 adressées aux interfaces. En effet, le protocole DHCP n’est pas établit.
+
+PC1 :
+int="eth0"
+net4="192.168.1"
+net6="fd00:192:168:1"
+hostnamectl set-hostname PC1
+systemctl stop networking
+ip add add ${net4}.1/24 dev ${int}
+ip -6 add add ${net6}::c1/64 dev ${int}
+ip link set dev ${int} up
+ip route add default via ${net4}.254
+ip add
+
+PC2 :
+ int="eth0"
+net4="192.168.2"
+net6="fd00:192:168:2"
+hostnamectl set-hostname PC2
+systemctl stop networking
+ip add add ${net4}.1/24 dev ${int}
+ip -6 add add ${net6}::c2/64 dev ${int}
+ip link set dev ${int} up
+ip route add default via ${net4}.254
+ip add
+
+Ensuite effectuer un ping sur chaque machine vers l’autre machine pour vérifier la connection au réseau.
+> ping 192.168.1.2 ou PING 192.168.1.1
+> ping fe80::1%eth0  (ping sur adresse privée en ipv6 vers toutes les interfaces eth0)
+
